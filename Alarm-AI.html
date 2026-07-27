@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Alarm-AI</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,Arial,sans-serif;
+}
+
+body{
+    background:#09090B;
+    color:white;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.container{
+
+    width:1200px;
+    height:550px;
+    background:#141414;
+    border-radius:25px;
+    padding:30px;
+    box-shadow:
+    0 0 25px rgba(0, 255, 255, 0.658);
+
+}
+
+h1{
+    text-align:center;
+    margin-bottom:25px;
+    color:#00d9ff;
+}
+
+#clock{
+
+    font-size:70px;
+    text-align:center;
+    font-weight:bold;
+
+}
+
+#date{
+
+    text-align:center;
+    color:#bbb;
+    margin-bottom:30px;
+
+}
+
+.addAlarm{
+
+    display:flex;
+    gap:10px;
+    margin-bottom:25px;
+
+}
+
+input[type=time]{
+
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#222;
+    color:white;
+    font-size:16px;
+
+}
+
+.picker{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:18px;
+
+    margin:35px 0;
+
+}
+
+.wheel{
+
+    width:90px;
+
+    height:170px;
+
+    overflow-y:auto;
+
+    scroll-snap-type:y mandatory;
+
+    scrollbar-width:none;
+
+    -ms-overflow-style:none;
+
+    text-align:center;
+
+    border-radius:18px;
+
+    background:#191919;
+
+    border:1px solid #2d2d2d;
+
+}
+
+.wheel::-webkit-scrollbar{
+
+    display:none;
+
+}
+
+.item{
+
+    height:42px;
+
+    line-height:42px;
+
+    font-size:28px;
+
+    color:#777;
+
+    scroll-snap-align:center;
+
+    transition:.25s;
+
+    user-select:none;
+
+}
+
+.item.active{
+
+    color:white;
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    text-shadow:0 0 12px cyan;
+
+}
+
+.colon{
+
+    font-size:42px;
+
+    font-weight:bold;
+
+    color:#00d9ff;
+
+}
+
+.addButton{
+
+    width:100%;
+
+}
+
+button{
+
+    cursor:pointer;
+    border:none;
+    border-radius:10px;
+    background:#00d9ff;
+    color:black;
+    font-weight:bold;
+    padding:12px 18px;
+    transition:.3s;
+
+}
+
+button:hover{
+
+    transform:scale(1.05);
+
+}
+
+.alarm{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    background:#1a1a1a;
+
+    border-radius:16px;
+
+    padding:18px;
+
+    margin-top:12px;
+
+    transition:.3s;
+
+}
+
+.alarm:hover{
+
+    background:#222;
+
+}
+.alarmLeft{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+}
+
+.alarmInfo{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.alarmTime{
+
+    font-size:22px;
+
+    font-weight:bold;
+
+}
+
+.alarmLabel{
+
+    color:#999;
+
+    font-size:13px;
+
+    margin-top:3px;
+
+}.switch{
+
+    position:relative;
+
+    display:inline-block;
+
+    width:52px;
+
+    height:28px;
+
+}
+
+.switch input{
+
+    display:none;
+
+}
+
+.slider{
+
+    position:absolute;
+
+    inset:0;
+
+    cursor:pointer;
+
+    background:#3b3b3b;
+
+    border-radius:100px;
+
+    transition:
+        background .35s ease,
+        box-shadow .35s ease;
+
+}
+
+.slider::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:22px;
+
+    height:22px;
+
+    left:3px;
+
+    top:3px;
+
+    background:#fff;
+
+    border-radius:50%;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.35);
+
+    transition:
+        transform .50s cubic-bezier(.22,1,.36,1),
+        background .50s ease,
+        box-shadow .50s ease;
+
+}
+
+.switch input:checked + .slider{
+
+    background:#00d9ff;
+
+    box-shadow:0 0 12px rgba(0,217,255,.45);
+
+}
+
+.switch input:checked + .slider::before{
+
+    transform:translateX(24px);
+
+}
+.switch{
+
+    -webkit-tap-highlight-color:transparent;
+
+}
+
+
+.delete{
+
+    background:#ff3f5c;
+    color:white;
+
+}
+
+#stopAlarm{
+
+    width:100%;
+    margin-top:25px;
+    display:none;
+
+}
+
+.ringing{
+
+    animation:ring .5s infinite;
+
+}
+
+@keyframes ring{
+
+0%{transform:rotate(0);}
+25%{transform:rotate(2deg);}
+50%{transform:rotate(-2deg);}
+75%{transform:rotate(2deg);}
+100%{transform:rotate(0);}
+
+}
+
+
+
+
+@media(max-width:768px){
+
+body{
+
+    align-items:flex-start;
+
+    padding:15px;
+
+}
+
+.container{
+
+    width:100%;
+
+    height:auto;
+
+    min-height:100vh;
+
+    padding:20px;
+
+    border-radius:0;
+
+}
+
+#clock{
+
+    font-size:52px;
+
+}
+
+.alarmTime{
+
+    font-size:20px;
+
+}
+
+button{
+
+    padding:10px 14px;
+
+}
+
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Alarm</h1>
+
+<div id="clock">00:00:00</div>
+
+<div id="date"></div>
+
+
+
+<div class="picker">
+    <div class="wheel" id="hourWheel"></div>
+    <div class="colon">:</div>
+    <div class="wheel" id="minuteWheel"></div>
+    <div class="wheel ampm" id="ampmWheel"></div>
+
+</div>
+
+<button class="addButton" onclick="addAlarm()">
+    Add Alarm
+</button>
+
+
+
+<div id="alarmList"></div>
+
+<button id="stopAlarm" onclick="stopAlarm()">Stop Alarm</button>
+
+</div>
+
+<audio id="alarmSound" loop>
+    <source src="alarm2.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+const clock = document.getElementById("clock");
+const date = document.getElementById("date");
+const list = document.getElementById("alarmList");
+const sound = document.getElementById("alarmSound");
+
+let alarms = JSON.parse(localStorage.getItem("alarms")) || [];
+
+// Convert old alarms to the new format
+alarms = alarms.map(alarm => {
+
+    if (typeof alarm === "string") {
+
+        return {
+            time: alarm,
+            enabled: true,
+            triggered: false
+        };
+
+    }
+
+    return {
+        time: alarm.time,
+        enabled: alarm.enabled ?? true,
+        triggered: false
+    };
+
+});
+
+let ringing = false;
+
+function updateClock(){
+
+    let now = new Date();
+
+    clock.innerHTML = now.toLocaleTimeString();
+
+    date.innerHTML = now.toDateString();
+
+    let current =
+        String(now.getHours()).padStart(2,"0") + ":" +
+        String(now.getMinutes()).padStart(2,"0");
+
+    alarms.forEach(alarm=>{
+
+        if(
+            alarm.enabled &&
+            alarm.time === current &&
+            !alarm.triggered
+        ){
+
+            alarm.triggered = true;
+
+            ringing = true;
+
+            document.body.classList.add("ringing");
+
+            document.getElementById("stopAlarm").style.display = "block";
+
+            sound.play();
+
+        }
+
+        if(alarm.time !== current){
+
+            alarm.triggered = false;
+
+        }
+
+    });
+
+}
+
+setInterval(updateClock,1000);
+
+updateClock();
+
+function save(){
+
+    localStorage.setItem("alarms", JSON.stringify(alarms));
+
+    render();
+
+}
+
+function addAlarm(){
+
+    const hour =
+        document.querySelector("#hourWheel .active").textContent;
+
+    const minute =
+        document.querySelector("#minuteWheel .active").textContent;
+
+    const period =
+        document.querySelector("#ampmWheel .active").textContent;
+
+    let h = parseInt(hour);
+
+    if(period==="PM" && h!==12) h+=12;
+
+    if(period==="AM" && h===12) h=0;
+
+    let finalTime =
+        String(h).padStart(2,"0")+":"+minute;
+
+    alarms.push({
+
+        time:finalTime,
+
+        enabled:true,
+
+        triggered:false
+
+    });
+
+    alarms.sort((a,b)=>a.time.localeCompare(b.time));
+
+    save();
+
+}
+
+function removeAlarm(index){
+
+    alarms.splice(index,1);
+
+    save();
+
+}
+
+function toggleAlarm(index){
+
+    alarms[index].enabled = !alarms[index].enabled;
+
+    localStorage.setItem("alarms", JSON.stringify(alarms));
+
+}
+
+function render(){
+
+    list.innerHTML = "";
+
+    alarms.forEach((alarm,index)=>{
+
+        list.innerHTML += `
+
+        <div class="alarm">
+
+            <div class="alarmLeft">
+
+                <label class="switch">
+
+                    <input
+                        type="checkbox"
+                        ${alarm.enabled ? "checked" : ""}
+                        onchange="toggleAlarm(${index})">
+
+                    <span class="slider"></span>
+
+                </label>
+
+                <div class="alarmInfo">
+
+                    <div class="alarmTime">
+
+                        ${alarm.time}
+
+                    </div>
+
+                    <div class="alarmLabel">
+
+                        Alarm
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button
+                class="delete"
+                onclick="removeAlarm(${index})">
+
+                Delete
+
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+}
+const hourWheel=document.getElementById("hourWheel");
+
+const minuteWheel=document.getElementById("minuteWheel");
+
+const ampmWheel=document.getElementById("ampmWheel");
+
+function buildWheel(){
+
+    for(let i=1;i<=12;i++){
+
+        hourWheel.innerHTML+=`
+
+        <div class="item">
+
+        ${String(i).padStart(2,"0")}
+
+        </div>
+
+        `;
+
+    }
+
+    for(let i=0;i<60;i++){
+
+        minuteWheel.innerHTML+=`
+
+        <div class="item">
+
+        ${String(i).padStart(2,"0")}
+
+        </div>
+
+        `;
+
+    }
+
+    ["AM","PM"].forEach(v=>{
+
+        ampmWheel.innerHTML+=`
+
+        <div class="item">
+
+        ${v}
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+buildWheel();
+
+function activateFirst(){
+
+    hourWheel.children[0].classList.add("active");
+    minuteWheel.children[0].classList.add("active");
+    ampmWheel.children[0].classList.add("active");
+
+}
+
+activateFirst();
+
+function stopAlarm(){
+
+    sound.pause();
+
+    sound.currentTime = 0;
+
+    ringing = false;
+
+    document.body.classList.remove("ringing");
+
+    document.getElementById("stopAlarm").style.display = "none";
+
+}
+
+// Draw alarms when the page loads
+render();
+
+</script>
+
+</body>
+</html>
